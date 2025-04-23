@@ -1,5 +1,5 @@
 import pandas as pd
-
+from sklearn import preprocessing
 
 def eng_data(data):
     # avg temp
@@ -57,7 +57,6 @@ def eng_data(data):
     data.sort_values(by=['date'])
     data['avg_temp'] = (data['temp_max'] + data['temp_min'])/2
     data['avg_humidity'] = (data['humidity_max'] + data['humidity_min'])/2
-    print(data['date'])
     data['date'] = pd.to_datetime(data['date'])
     data['year'] = data['date'].dt.year
     data['month'] =  data['date'].dt.month
@@ -68,22 +67,38 @@ def eng_data(data):
     data['month_windy'] = data.groupby(by=['year','month'])['windspeed'].transform('mean')
     data['month_humidity'] = data.groupby(by=['year','month'])['avg_humidity'].transform('mean')
     
-    data['NDVI_rate'] = data['NDVI'].map(lambda x:ndvi_points(x))
-    data['month_temp'] = data['month_temp'].map(lambda x:temp_points(x))
-    data['month_windy'] = data['month_windy'].map(lambda x:windy_points(x))
-    data['month_humidity'] = data['month_humidity'].map(lambda x:humidity_points(x))
-    data['month_precipitation'] = data['month_precipitation'].map(lambda x:precipitation_points(x))
+    #normalization system
+    data['month_precipitation'] = preprocessing.normalize(data[['month_precipitation']]).flatten()
+    data['month_temp'] = preprocessing.normalize(data[['month_temp']]).flatten()
+    data['month_windy'] = preprocessing.normalize(data[['month_windy']]).flatten()
+    data['month_humidity'] = preprocessing.normalize(data[['month_humidity']]).flatten()
+        
+    # rating system 
+    # data['NDVI_rate'] = data['NDVI'].map(lambda x:ndvi_points(x))
+    # data['month_temp'] = data['month_temp'].map(lambda x:temp_points(x))
+    # data['month_windy'] = data['month_windy'].map(lambda x:windy_points(x))
+    # data['month_humidity'] = data['month_humidity'].map(lambda x:humidity_points(x))
+    # data['month_precipitation'] = data['month_precipitation'].map(lambda x:precipitation_points(x))
     # honey points
     data['honey_points_month'] = (
-        data['month_temp'] * 0.4 + 
-        data['NDVI_rate']*0.4 +
-        data['month_precipitation'] *0.4+
-        data['month_humidity'] * 0.4 - 
-        data['month_windy'] * 0.2
+        data['month_temp']  + 
+        # data['NDVI_rate'] +
+        data["NDVI"] +
+        data['month_precipitation'] +
+        data['month_humidity']  - 
+        data['month_windy'] 
     )
-    columns_to_drop = ['temp_max', 'temp_min', 'humidity_max', 'humidity_min', 'windspeed', 'precipitation', 'avg_temp', 'avg_humidity']
+    columns_to_drop = ['temp_max','date','NDVI', 'temp_min', 'humidity_max', 'humidity_min', 'windspeed', 'precipitation', 'avg_temp', 'avg_humidity']
     data.drop(columns=columns_to_drop, inplace=True)
+    data.drop_duplicates(['year','month'],inplace=True)
     return data
 
-data = pd.read_csv('processed_weather.csv')
-print(eng_data(data))
+if __name__ =='__main__':
+    data = pd.read_csv('processed_weather.csv')
+    data.drop(columns=['date'],inplace=True)
+    #i could drop duplicate by any month counted value since they are same for each day
+    monthly_df = data.drop_duplicates(['year','month'])
+    monthly_df.to_csv("processed_weather.csv")
+    print(monthly_df['NDVI'])
+
+# next task should be to eng data a little bit more, need to think is it better to have only points for prediction or whole values but engineered more
