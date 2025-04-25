@@ -17,14 +17,16 @@ class honey_digger:
         date = datetime.now().date()
         self.data = fetch_data(self.lat,self.lon,self.date)
         self.data = get_ndvi_data(self.lat,self.lon,self.data)
-        self.data.to_csv("raw_data.csv",index=False)
-        self.data,scaler = eng_data(self.data)
+        self.data.to_csv("raw_data_ivanjica.csv",index=False)
+        self.data = eng_data(self.data)
         self.data.to_csv('processed_weather.csv',index=False)
-        return features_model(self.data,scaler,date)
+        return features_model(self.data,date,self.lat,self.lon)
 
 if __name__ == "__main__":
     five_days_ago = (datetime.now() - timedelta(days=5)).date()
-    # lat,lon = 43.14625558273692, 20.470546676707183 [76.99524246]
-    lat,lon = 42.95587735274444, 20.751945787687802
+    #zabren Honey points for this place 0    0.20
+    # lat,lon = 43.17434434405553, 20.12065665469868 
+    #Ivanjica Honey points for this place 0    0.25
+    lat,lon =43.578489837563446, 20.186082679577883
     hd = honey_digger(lat,lon,five_days_ago)
     print('Honey points for this place',hd.run_pipeline())
