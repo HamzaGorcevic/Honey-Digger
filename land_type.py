@@ -17,6 +17,5 @@ def get_land_type_nominatim(lat: float, lon: float) -> str:
     resp.raise_for_status()     # error if non-200
     place = resp.json()
     
-    # Prefer 'category' → fallback to 'class' → fallback to 'type'
     land_type = place.get("category") or place.get("class") or place.get("type") or "unknown"
     return land_type.lower()

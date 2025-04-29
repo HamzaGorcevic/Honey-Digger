@@ -25,7 +25,8 @@ class honey_digger:
 if __name__ == "__main__":
     five_days_ago = (datetime.now() - timedelta(days=5)).date()
     #zabren Honey points for this place 0    0.20
-    # lat,lon = 43.17434434405553, 20.12065665469868 
+    # lat,lon = 43.17434434405553, 20.12065665469868
+     
     #Ivanjica Honey points for this place 0    0.25
     lat,lon =43.578489837563446, 20.186082679577883
     hd = honey_digger(lat,lon,five_days_ago)
