@@ -53,7 +53,7 @@ earthengine set_project your-project-id
 3. Run the script:
 
 ```bash
-python honey_digger.py
+streamlit run honey_digger.py
 ```
 
 ## 📊 Output
