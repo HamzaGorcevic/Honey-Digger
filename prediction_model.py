@@ -11,6 +11,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from land_type import get_land_type_nominatim
 import numpy as np
+
 def features_model(data:pd.DataFrame,curr_date,lat,lon,months_arg=1):
     future_month = curr_date + relativedelta(month=+months_arg)
     data.dropna(inplace=True)
@@ -26,21 +27,19 @@ def features_model(data:pd.DataFrame,curr_date,lat,lon,months_arg=1):
         y_train = train_data[target]
         X_test = test_data[features]
         y_test = test_data[target]
-        
         y_test = y_test.values.ravel()
-        
         gb_model = GradientBoostingRegressor(n_estimators=50,random_state=42)
         gb_model.fit(X_train,y_train)
         gb_predicted_data = gb_model.predict(X_test)
         gb_predicted_values[target] = gb_predicted_data
 
-    print(data[['year','month','month_temp']])
-    plt.figure(figsize=(10,4))
-    plt.scatter(test_data['month'],gb_predicted_values['month_temp'],color='red',alpha=0.6)
-    plt.scatter(test_data['month'],test_data['month_temp'],color='blue',alpha=0.6)
-    plt.xlabel='Months'
-    plt.ylabel='Honey Points'
-    plt.show()
+    # print(data[['year','month','month_temp']])
+    # plt.figure(figsize=(10,4))
+    # plt.scatter(test_data['month'],gb_predicted_values['month_temp'],color='red',alpha=0.6)
+    # plt.scatter(test_data['month'],test_data['month_temp'],color='blue',alpha=0.6)
+    # plt.xlabel='Months'
+    # plt.ylabel='Honey Points'
+    # plt.show()
 
     # future month preparation
     last_row = data.tail(1).copy()

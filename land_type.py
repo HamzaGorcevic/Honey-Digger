@@ -8,7 +8,7 @@ def get_land_type_nominatim(lat: float, lon: float) -> str:
     params = {
         "lat": lat,
         "lon": lon,
-        "format": "jsonv2",      # JSONv2 includes 'category'
+        "format": "jsonv2",      
         "zoom": 18,
         "addressdetails": 0
     }

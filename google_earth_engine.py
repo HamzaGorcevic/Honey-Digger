@@ -2,7 +2,6 @@ import ee
 import pandas as pd
 import datetime
 
-# Initialize Earth Engine (call once at script start)
 try:
     ee.Initialize()
 except ee.EEException as e:
@@ -10,11 +9,9 @@ except ee.EEException as e:
     raise
 
 def get_ndvi_data(latitude, longitude, weather_data):
-    # Validate inputs
     if not isinstance(weather_data, pd.DataFrame) or 'date' not in weather_data.columns:
         raise ValueError("weather_data must be a pandas DataFrame with a 'date' column")
     
-    # Extract year-month combinations from weather_data
     try:
         if pd.api.types.is_datetime64_any_dtype(weather_data['date']):
             year_months = sorted(set(weather_data['date'].dt.strftime('%Y-%m')))
@@ -25,24 +22,19 @@ def get_ndvi_data(latitude, longitude, weather_data):
     except (ValueError, TypeError) as e:
         raise ValueError("Could not extract year-month from weather_data['date']: " + str(e))
 
-    # Validate coordinates
     if not (-180 <= longitude <= 180 and -90 <= latitude <= 90):
         raise ValueError("Invalid coordinates: latitude and longitude out of range")
 
-    # Define point geometry
     point = ee.Geometry.Point([longitude, latitude])
 
     def get_monthly_ndvi(year, month):
-        # Skip months before July 2015 (Sentinel-2 availability)
         if year == 2015 and month < 7:
             print(f"Skipping {year}-{month:02d}: Sentinel-2 data unavailable before July 2015.")
             return None
 
         start_date = f'{year}-{month:02d}-01'
-        # Calculate end date as the last day of the month
         end_date = ee.Date(start_date).advance(1, 'month').advance(-1, 'day')
 
-        # Sentinel-2 image collection with cloud masking
         def mask_clouds(image):
             scl = image.select('SCL')
             # Keep valid pixels: 2 (dark area), 4 (vegetation), 5 (bare soil), 6 (water), 7 (unclassified), 11 (snow/ice)
